@@ -1,0 +1,287 @@
+'use client';
+
+import { useLayoutEffect, useRef, useState } from 'react';
+import Image from 'next/image';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { MotionPathPlugin } from 'gsap/MotionPathPlugin';
+import FloatingClouds from './FloatingClouds';
+
+gsap.registerPlugin(ScrollTrigger, MotionPathPlugin);
+
+// Exact Years and Data
+const timelineData = [
+    { year: '1995', desc: 'Established Japan & India Joint Venture' },
+    { year: '1996', desc: 'Maruti Suzuki Gurugram Paint Shop 3 by Global Bidding' },
+    { year: '1997', desc: 'First Robot Painting in India for 3W Bajaj, Aurangabad' },
+    { year: '1999', desc: 'Electrical CP Manesar Factory' },
+    { year: '2002', desc: 'Escorts 1st Indian client Tractor Paint Shop' },
+    { year: '2004', desc: 'First Rail Coach Painting plant ICF, Chennai' },
+    { year: '2007', desc: 'Fabrication Factory Pune' },
+    { year: '2011', desc: 'Biggest Comm. Veh-72 JPH P/S Tata UTK' },
+    { year: '2011', desc: 'European Client Daimler Paint Shop' },
+    { year: '2012', desc: 'Fabrication Factory Vadodara' },
+    { year: '2014', desc: 'First EPC Contract for Railways DLW, Varanasi' },
+    { year: '2018', desc: 'Conveyor Factory Pune' },
+    { year: '2019', desc: 'IoT Division Gurugram' },
+    { year: '2020', desc: 'Robot Pre-Assembly Manesar' },
+    { year: '2021', desc: 'Nexcel Technical Center, Manesar' },
+];
+
+export default function Scene2_Timeline() {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const svgRef = useRef<SVGSVGElement>(null);
+    const pathRef = useRef<SVGPathElement>(null);
+    const arrowRef = useRef<HTMLDivElement>(null);
+
+    // State for responsive layout
+    const [itemsPerRow, setItemsPerRow] = useState(3);
+    const rowHeight = 180;
+    const [viewBoxWidth, setViewBoxWidth] = useState(1000);
+    const marginX = itemsPerRow === 1 ? 50 : 100; // Less margin on mobile
+
+    // Responsive Listener
+    useLayoutEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth < 768) {
+                setItemsPerRow(1);
+                setViewBoxWidth(400); // Narrower coordinate system for mobile
+            } else {
+                setItemsPerRow(3);
+                setViewBoxWidth(1000);
+            }
+        };
+
+        // Initial Check
+        handleResize();
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    // Dynamic Path Generation Logic
+    const generateZigZagPath = () => {
+        let d = "";
+        const totalRows = Math.ceil(timelineData.length / itemsPerRow);
+        let currentY = 100;
+        const extension = 80;
+
+        for (let row = 0; row < totalRows; row++) {
+            const isLtoR = row % 2 === 0;
+            const startX = isLtoR ? marginX - extension : viewBoxWidth - marginX + extension;
+            const endX = isLtoR ? viewBoxWidth - marginX : marginX;
+
+            if (row === 0) {
+                // Only use M for the first row
+                d += `M ${startX} ${currentY}`;
+            } else {
+                // Continue from previous curve end
+                d += ` L ${startX} ${currentY}`;
+            }
+
+            // Draw horizontal line to end
+            d += ` L ${endX} ${currentY}`;
+
+            if (row < totalRows - 1) {
+                const nextY = currentY + rowHeight;
+                const curveStartX = isLtoR ? endX + extension : endX - extension;
+                const controlX = isLtoR ? viewBoxWidth + extension : -extension;
+
+                d += ` L ${curveStartX} ${currentY}`;
+                d += ` C ${controlX} ${currentY}, ${controlX} ${nextY}, ${curveStartX} ${nextY}`;
+
+                currentY = nextY;
+            } else {
+                // Final horizontal extension
+                d += ` L ${isLtoR ? endX + extension : endX - extension} ${currentY}`;
+            }
+        }
+
+        return d;
+    };
+
+
+
+    const getNodePosition = (index: number) => {
+        const row = Math.floor(index / itemsPerRow);
+        const colInRow = index % itemsPerRow;
+        const isLtoR = row % 2 === 0;
+        const effectiveWidth = viewBoxWidth - (2 * marginX);
+        const segmentWidth = effectiveWidth / (itemsPerRow - 1);
+        let x = marginX + (colInRow * segmentWidth);
+        if (!isLtoR) {
+            x = (viewBoxWidth - marginX) - (colInRow * segmentWidth);
+        }
+        const y = 100 + (row * rowHeight);
+        return { x, y };
+    };
+
+    useLayoutEffect(() => {
+        const ctx = gsap.context(() => {
+
+            // Master Timeline for Draw + Arrow
+            const tl = gsap.timeline({
+                scrollTrigger: {
+                    trigger: containerRef.current,
+                    start: 'top center', // Start drawing when section hits center
+                    end: 'bottom bottom', // Finish when section ends
+                    scrub: 1,
+                }
+            });
+
+            // 1. Draw Line (Reveal Mask)
+            const length = pathRef.current?.getTotalLength() || 0;
+            gsap.set(pathRef.current, { strokeDasharray: length, strokeDashoffset: length });
+
+            tl.to(pathRef.current, {
+                strokeDashoffset: 0,
+                ease: 'none',
+                duration: 10, // Arbitrary duration, scrubbed
+            }, 0);
+
+            // 2. Move Arrow Head along the SAME path
+            // We use the Mask Path as the MotionPath
+            tl.to(arrowRef.current, {
+                motionPath: {
+                    path: pathRef.current as any, // eslint-disable-line @typescript-eslint/no-explicit-any
+                    align: pathRef.current as any, // eslint-disable-line @typescript-eslint/no-explicit-any
+                    autoRotate: true,
+                    alignOrigin: [0.5, 0.5],
+                },
+                ease: 'none',
+                duration: 10, // Match duration
+            }, 0);
+
+
+            // 3. Node Activations - Sync with Line Progress
+            // We select all nodes and animate them as part of the main scrub/timeline
+            const nodes = gsap.utils.toArray('.timeline-node');
+            const totalNodes = nodes.length;
+            const duration = 10; // Must match the path drawing duration above
+
+            nodes.forEach((node: any, i) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+                // Calculate precise timing based on index
+                // Nodes are ordered 0..N in the DOM
+                // The arrow travels the full path in 'duration'.
+
+                // Adjusted Timing: Use (totalNodes - 1) to map the last node to exactly 100%
+                // Added a small POSITIVE delay (+0.1s in timeline time) to ensure arrow hits the point first
+                const percent = i / (totalNodes - 1);
+                const startTime = (duration * percent) + 0.1;
+
+                tl.fromTo(node,
+                    { scale: 0, opacity: 0 },
+                    {
+                        scale: 1,
+                        opacity: 1,
+                        duration: 0.2, // Faster pop-in for snappier feel
+                        ease: 'back.out(2)',
+                    },
+                    startTime // Insert at specific time
+                );
+            });
+
+        }, containerRef);
+        return () => ctx.revert();
+    }, []);
+
+    return (
+        <section ref={containerRef} className="relative w-full pt-10 pb-40 font-outfit"> {/* Removed overflow-hidden for sticky bg */}
+
+            {/* Scene 2 Background - Sticky Wrapper */}
+            <div className="absolute inset-0 z-0">
+                <div className="sticky top-0 h-screen w-full overflow-hidden">
+                    <Image
+                        src="/images/scene2-bg.jpg"
+                        alt="Scene 2 Background"
+                        fill
+                        className="object-cover object-top grayscale brightness-[0.4]"
+                    />
+                    {/* Clouds inside fixed background so they stay with it */}
+                    <div className="absolute inset-0 z-[1] pointer-events-none">
+                        <FloatingClouds />
+                    </div>
+                </div>
+            </div>
+
+            {/* Content scrolls RELATIVELY over the sticky background */}
+            <div className="container mx-auto px-6 md:px-12 relative z-10">
+
+                {/* Section Header - Left Aligned with One Color */}
+                <div className="mb-16 pl-6 border-l-[8px] border-yellow-400">
+                    <h2 className="text-4xl md:text-5xl font-bebas font-bold italic text-white tracking-wide shadow-sm uppercase">
+                        Taikisha Journey In India
+                    </h2>
+                </div>
+
+                {/* Timeline Container */}
+                {/* Timeline Container - Dynamic Height */}
+                <div
+                    className="relative w-full max-w-[1000px] mx-auto transition-all duration-500"
+                    style={{ height: itemsPerRow === 1 ? `${(timelineData.length * rowHeight) + 200}px` : '950px' }} // Taller for mobile list
+                >
+
+                    {/* SVG Layer */}
+                    <div className="absolute inset-0 w-full h-full z-0">
+                        <svg ref={svgRef} viewBox={`0 0 ${viewBoxWidth} ${itemsPerRow === 1 ? (timelineData.length * rowHeight) + 200 : 950}`} className="w-full h-full overflow-visible">
+                            <defs>
+                                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                    <polygon points="0 0, 10 3.5, 0 7" fill="#ffffff" />
+                                </marker>
+                            </defs>
+
+                            {/* Background Trace (Dotted White - Finer) */}
+                            <path d={generateZigZagPath()} fill="none" stroke="white" strokeWidth="1.5" strokeDasharray="6 6" opacity="0.4" markerEnd="url(#arrowhead)" />
+
+                            {/* Animated Progress Path (Solid White - Thinner) */}
+                            <path
+                                ref={pathRef}
+                                d={generateZigZagPath()}
+                                fill="none"
+                                stroke="#ffffff"
+                                strokeWidth="3"
+                                strokeLinecap="round"
+                            />
+                        </svg>
+                    </div>
+
+                    {/* Data Layer */}
+                    {timelineData.map((item, i) => {
+                        const { x, y } = getNodePosition(i);
+                        const leftPercent = (x / viewBoxWidth) * 100;
+
+                        return (
+                            <div
+                                key={i}
+                                className="timeline-node absolute flex flex-col items-center justify-center -translate-x-1/2 -translate-y-1/2 z-10 w-6 h-6 md:w-8 md:h-8 opacity-0" // Added opacity-0 default
+                                style={{ left: `${leftPercent}%`, top: `${y}px` }}
+                            >
+                                {/* Node Dot - Yellow Intersection */}
+                                <div className="w-3 h-3 md:w-4 md:h-4 bg-yellow-400 border-[2px] border-white rounded-full shadow-[0_0_15px_rgba(251,191,36,0.6)] z-20 hover:scale-150 transition-transform duration-300 cursor-pointer" />
+
+                                {/* Year - ALWAYS ABOVE */}
+                                <div className="absolute -top-10 md:-top-12 w-32 px-2 text-center z-10">
+                                    <span className="block text-xl md:text-2xl font-black text-white drop-shadow-md tracking-tight">{item.year}</span> {/* Smaller Font */}
+                                </div>
+
+                                {/* Description - ALWAYS BELOW */}
+                                <div className="absolute top-6 md:top-8 w-40 px-2 text-center z-10">
+                                    <span className="block text-[10px] md:text-xs font-bold italic text-white/80 uppercase tracking-wider">{item.desc}</span>
+                                </div>
+                            </div>
+                        );
+                    })}
+
+                    {/* The Active "Leader" Arrow Head - Moves via GSAP MotionPath */}
+                    <div ref={arrowRef} className="absolute z-20 w-8 h-8 pointer-events-none -ml-4 -mt-4">
+                        {/* Custom Arrow SVG */}
+                        <svg viewBox="0 0 24 24" fill="none" className="w-full h-full drop-shadow-[0_0_10px_rgba(251,191,36,0.8)]">
+                            <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="#fbbf24" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+    );
+}
