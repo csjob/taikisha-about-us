@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useMemo, useState, useEffect } from 'react';
+import React, { useRef, useMemo, useState } from 'react';
 import { Canvas, useLoader } from '@react-three/fiber';
 import { OrbitControls, Html, useCursor } from '@react-three/drei';
 import * as THREE from 'three';
@@ -68,7 +68,7 @@ function Marker({ lat, lng, Office, company, city, country, address, phone, fax,
             {/* Popover / Tooltip */}
             {(hovered || isActive) && (
                 // <Html position={[0, 0, -pinHeight * 1.5]} style={{ pointerEvents: 'none' }}>
-   <Html position={[0, 0, -pinHeight * 1.5]} style={{ pointerEvents: 'none' }}>
+                <Html position={[0, 0, -pinHeight * 1.5]} style={{ pointerEvents: 'none' }}>
                     <div className="bg-slate-900/95 text-white p-2 rounded-md border border-blue-500/30 backdrop-blur-md shadow-xl w-56 transform -translate-x-1/2 -translate-y-full pointer-events-auto text-left">
 
 
@@ -111,10 +111,9 @@ function GlobeContent({ activeLocation, setActiveLocation }: GlobeContentProps) 
     const [autoRotate, setAutoRotate] = useState(true);
 
     // Load Earth Texture (Using local satellite texture)
-    const [colorMap, normalMap, specularMap] = useLoader(THREE.TextureLoader, [
+    const [colorMap, normalMap] = useLoader(THREE.TextureLoader, [
         '/images/scene5/earth-texture.jpg',
-        'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_normal_2048.jpg',
-        'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_specular_2048.jpg'
+        'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_normal_2048.jpg'
     ]);
 
     return (

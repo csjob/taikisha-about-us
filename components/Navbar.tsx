@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
 
 export default function Navbar() {
@@ -26,10 +27,11 @@ export default function Navbar() {
                     {/* Logo Image */}
                     <div className="relative h-8 w-40"> {/* Fixed height, width container */}
                         {/* Make sure to place public/images/logo.png */}
-                        <img
+                        <Image
                             src="/images/logo.png"
                             alt="TAIKISHA"
-                            className="h-full w-auto object-contain"
+                            fill
+                            className="object-contain"
                         />
                     </div>
                 </Link>

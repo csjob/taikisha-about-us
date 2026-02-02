@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 
 export default function Footer() {
     return (
@@ -8,11 +9,12 @@ export default function Footer() {
             <div className="max-w-7xl mx-auto flex items-center justify-between gap-6">
 
                 {/* Logo */}
-                <div className="flex-shrink-0 h-6 w-28">
-                    <img
+                <div className="flex-shrink-0 h-6 w-28 relative">
+                    <Image
                         src="/images/logo.png"
                         alt="TAIKISHA"
-                        className="h-full w-auto object-contain"
+                        fill
+                        className="object-contain"
                     />
                 </div>
 

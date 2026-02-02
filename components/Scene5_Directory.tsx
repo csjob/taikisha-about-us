@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -11,7 +11,6 @@ import CompanyDirectoryModal from './CompanyDirectoryModal';
 gsap.registerPlugin(ScrollTrigger);
 
 export default function Scene5_Directory() {
-    const containerRef = useRef<HTMLDivElement>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     return (
