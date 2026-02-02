@@ -32,7 +32,6 @@ export default function Scene2_Timeline() {
     const containerRef = useRef<HTMLDivElement>(null);
     const svgRef = useRef<SVGSVGElement>(null);
     const maskPathRef = useRef<SVGPathElement>(null); // For Drawing Animation (Mask)
-    const motionPathRef = useRef<SVGPathElement>(null); // For Arrow Guide & Length
     const pathRef = useRef<SVGPathElement>(null);
     const arrowRef = useRef<HTMLDivElement>(null);
 

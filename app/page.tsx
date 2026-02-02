@@ -4,7 +4,6 @@ import Scene4_ParallaxText from "@/components/Scene4_ParallaxText";
 import Scene5_Directory from "@/components/Scene5_Directory";
 import FloatingClouds from "@/components/FloatingClouds";
 import Footer from "@/components/Footer";
-import Scene3_Map_Sequence from "@/components/Scene3_Map_Sequence";
 import ScrollSnapper from "@/components/ScrollSnapper";
 import Scene3_Map from "@/components/Scene3_Map_Sequence";
 
