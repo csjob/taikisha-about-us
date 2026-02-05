@@ -29,10 +29,11 @@ function Marker({ lat, lng, Office, company, city, country, address, phone, fax,
     // Change cursor on hover
     useCursor(hovered);
 
-    // Pin visual parameters
-    const pinHeight = 0.15;
-    const pinRadius = 0.02;
-    const headRadius = 0.08;
+    // Pin visual parameters (reduced slightly)
+    const pinHeight = 0.12;     // was 0.15
+    const pinRadius = 0.016;   // was 0.02
+    const headRadius = 0.065;  // was 0.08
+
 
     // Calculate rotation to stand upright on the sphere surface
     const quaternion = useMemo(() => {
@@ -47,23 +48,72 @@ function Marker({ lat, lng, Office, company, city, country, address, phone, fax,
             {/* Pin Stem (Line) */}
             <mesh position={[0, 0, -pinHeight / 2]}> {/* Move back along local Z to sit on surface */}
                 <cylinderGeometry args={[pinRadius, pinRadius, pinHeight, 8]} />
-                <meshBasicMaterial color={hovered || isActive ? "#fbbf24" : "#60a5fa"} />
+                <meshBasicMaterial
+                    color={hovered || isActive ? "#ef4444" : "#dc2626"} // red-500 / red-600
+                />
+
             </mesh>
 
-            {/* Pin Head (Dot) */}
+            {/* Pin Head (Outer) */}
             <mesh
-                position={[0, 0, -pinHeight]} // Top of the stem
+                position={[0, 0, -pinHeight]}
                 onClick={onClick}
-                onPointerOver={(e) => { e.stopPropagation(); setHover(true); onPointerOver(); }}
-                onPointerOut={() => { setHover(false); onPointerOut(); }}
+                onPointerOver={(e) => {
+                    e.stopPropagation();
+                    setHover(true);
+                    onPointerOver();
+                }}
+                onPointerOut={() => {
+                    setHover(false);
+                    onPointerOut();
+                }}
             >
                 <sphereGeometry args={[headRadius, 16, 16]} />
                 <meshStandardMaterial
-                    color={hovered || isActive ? "#fbbf24" : "#eff6ff"}
-                    emissive={hovered || isActive ? "#fbbf24" : "#2563eb"}
+                    color={hovered || isActive ? "#ef4444" : "#9e0000"}
+                    emissive={hovered || isActive ? "#ef4444" : "#991b1b"}
                     emissiveIntensity={2}
                 />
             </mesh>
+
+            {/* Pin Head (Outer) */}
+            <mesh
+                position={[0, 0, -pinHeight]}
+                onClick={onClick}
+                onPointerOver={(e) => {
+                    e.stopPropagation();
+                    setHover(true);
+                    onPointerOver();
+                }}
+                onPointerOut={() => {
+                    setHover(false);
+                    onPointerOut();
+                }}
+            >
+                <sphereGeometry args={[headRadius, 16, 16]} />
+                <meshStandardMaterial
+                    color={hovered || isActive ? "#ef4444" : "#9e0000"}
+                    emissive={hovered || isActive ? "#ef4444" : "#991b1b"}
+                    emissiveIntensity={2}
+                />
+            </mesh>
+
+            {/* Inner Black Dot */}
+            <mesh
+                position={[0, 0, -pinHeight + headRadius * 0.35]}
+                raycast={() => null} // ⬅ prevents event interference
+            >
+                <sphereGeometry args={[headRadius * 0.25, 12, 12]} />
+                <meshStandardMaterial
+                    color="#000000"
+                    emissive="#000000"
+                    emissiveIntensity={0}
+                />
+            </mesh>
+
+
+
+
 
             {/* Popover / Tooltip */}
             {(hovered || isActive) && (
@@ -238,12 +288,6 @@ export default function Globe3D() {
                 </GlobeErrorBoundary>
             </Canvas>
         </div>
-
-
-
-
-
-
 
     );
 }
