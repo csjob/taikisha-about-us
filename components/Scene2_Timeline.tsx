@@ -126,7 +126,7 @@ export default function Scene2_Timeline() {
                     trigger: containerRef.current,
                     start: 'top center', // Start drawing when section hits center
                     // end: 'bottom bottom', // Finish when section ends
-                    end: '+=1000', 
+                    end: '+=1000',
                     scrub: 2
                     // scrub: 1,
                 }
@@ -295,14 +295,22 @@ export default function Scene2_Timeline() {
                                 <div className="w-3 h-3 md:w-4 md:h-4 bg-yellow-400 border-[2px] border-white rounded-full shadow-[0_0_15px_rgba(251,191,36,0.6)] z-20 hover:scale-150 transition-transform duration-300 cursor-pointer" />
 
                                 {/* Year - ALWAYS ABOVE */}
-                                <div className="absolute -top-10 md:-top-12 w-32 px-2 text-center z-10">
-                                    <span className="block text-xl md:text-2xl font-black text-white drop-shadow-md tracking-tight">{item.year}</span> {/* Smaller Font */}
+                                <div className="absolute -top-10 md:-top-8 w-32 px-2 text-center z-10">
+                                    <span className="block text-xl md:text-2xl font-black text-white drop-shadow-md tracking-tight">
+                                        {item.year}
+                                    </span>
                                 </div>
 
                                 {/* Description - ALWAYS BELOW */}
-                                <div className="absolute top-6 md:top-8 w-40 px-2 text-center z-10">
+                                {/* <div className="absolute top-6 md:top-8 w-40 px-2 text-center z-10">
                                     <span className="block text-[12px] md:text-[15px] lg:text-[15px]  font-bold italic text-white/80 uppercase tracking-wider">{item.desc}</span>
+                                </div> */}
+                                <div className="absolute top-6 md:top-8 w-56 md:w-64 px-2 text-center z-10">
+                                    <span className="block text-[12px] md:text-[15px] font-bold italic text-white/80 uppercase tracking-wide leading-snug">
+                                        {item.desc}
+                                    </span>
                                 </div>
+
                             </div>
                         );
                     })}
