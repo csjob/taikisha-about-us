@@ -123,7 +123,7 @@ export default function Scene1_Founder() {
                                 </p>
 
                             </div>
-                            <blockquote className="text-[15pt] font-roboto font-bold text-white leading-relaxed mt-4 border-t border-white/20 pt-4 text-justify [text-align-last:justify] w-full">
+                            <blockquote className="text-[15pt] font-roboto text-white leading-relaxed mt-4 border-t border-white/20 pt-4 text-justify [text-align-last:justify] w-full">
                                 &ldquo;Time is the greatest asset in human life and to be well planned and not wasted. Every man striving to achieve highest quality with ethical working can change not only the nation, but also the whole world.&rdquo;
                             </blockquote>
                         </div>
@@ -163,7 +163,7 @@ export default function Scene1_Founder() {
                         </div>
 
                         <div className="space-y-1 leading-relaxed">
-                            <p className="text-[14.8pt] font-roboto font-bold text-white text-justify [text-align-last:justify]">
+                            <p className="text-[15pt] font-roboto text-white text-justify [text-align-last:justify]">
                                 Customers are defined as Overall Society in a broad sense. The spirit of &quot;Customers First&quot; is to win
                                 persistent trust from the customer. To achieve this goal, we have to follow our own conscience and
                                 make the utmost efforts in every doing, based on the belief that the behaviour of individuals or the
