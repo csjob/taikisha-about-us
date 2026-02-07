@@ -1,122 +1,156 @@
-'use client';
+"use client";
 
-import { useRef, useEffect, useState } from 'react';
-import NextImage from 'next/image';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import React, { useLayoutEffect, useRef, useState } from "react";
+import Image from "next/image";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// CONFIGURATION
-const FRAME_COUNT = 100; // Total number of frames in the sequence
-const IMAGE_FOLDER = '/images/scene3/sequence/';
-const IMAGE_PREFIX = 'frame_'; // e.g., frame_0001.jpg
-const IMAGE_EXTENSION = 'png';
+const frameCount = 23;
+const currentFrame = (index: number) => 
+    `/images/scene3/sequence/frame_${index + 1}.png`;
 
-export default function Scene3_Map() {
+const Scene3_Map_Sequence: React.FC = () => {
     const containerRef = useRef<HTMLDivElement>(null);
+    const mapSectionRef = useRef<HTMLDivElement>(null); // To move the map up
+    const bgRef = useRef<HTMLDivElement>(null); 
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const imagesRef = useRef<HTMLImageElement[]>([]);
-    const [isLoaded, setIsLoaded] = useState(false);
+    const [images, setImages] = useState<HTMLImageElement[]>([]);
 
-    // 1. Preload Images
-    useEffect(() => {
-        const loadImages = async () => {
-            const promises: Promise<void>[] = [];
+    // 1. Preload Sequence Frames
+    useLayoutEffect(() => {
+        const loadedImages: HTMLImageElement[] = [];
+        let loadedCount = 0;
 
-            for (let i = 0; i < FRAME_COUNT; i++) {
-                const img = new Image();
-                const padIndex = String(i).padStart(4, '0');
-                const src = `${IMAGE_FOLDER}${IMAGE_PREFIX}${padIndex}.${IMAGE_EXTENSION}`;
-
-                img.src = src;
-                imagesRef.current[i] = img;
-
-                // Decode if possible, but resolve immediately on load/error
-                const p = new Promise<void>((resolve) => {
-                    img.onload = () => {
-                        // Try to decode for smoother playback
-                        if (img.decode) {
-                            img.decode().catch(() => { }).finally(() => resolve());
-                        } else {
-                            resolve();
-                        }
-                    };
-                    img.onerror = () => resolve();
-                });
-
-                promises.push(p);
-
-                imagesRef.current[0].onload = () => {
-                    setIsLoaded(true);
-                };
-
-            }
-
-            // Don’t block rendering — mark as loaded once the *first frame* is ready
-            await promises[0];
-            setIsLoaded(true);
-
-            // Continue decoding the rest in background
-            Promise.all(promises).then(() => {
-                console.log('Scene 3: All images loaded/decoded.');
-            });
-        };
-
-        loadImages();
+        for (let i = 0; i < frameCount; i++) {
+            const img = new window.Image();
+            img.src = currentFrame(i);
+            img.onload = () => {
+                loadedCount++;
+                if (loadedCount === frameCount) setImages(loadedImages);
+            };
+            loadedImages.push(img);
+        }
     }, []);
 
-    // renderFrame functionality removed as it was unused and causing lint errors
-    // If you need to restore the sequence logic, ensure renderFrame is called via GSAP scrollTrigger
-    // const renderFrame = (index: number) => { ... }
+    // 2. Animation Logic
+    useLayoutEffect(() => {
+        if (images.length < frameCount || !canvasRef.current || !containerRef.current) return;
 
-    // ... (GSAP and Resize hooks remain same)
+        const canvas = canvasRef.current;
+        const context = canvas.getContext("2d");
+        canvas.width = 1920;
+        canvas.height = 1080;
+
+        const sequenceObj = { frame: 0 };
+
+        const render = () => {
+            if (!context) return;
+            const img = images[Math.round(sequenceObj.frame)];
+            if (img) {
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                context.drawImage(img, 0, 0, canvas.width, canvas.height);
+            }
+        };
+
+        render();
+
+        const ctx = gsap.context(() => {
+            const tl = gsap.timeline({
+                scrollTrigger: {
+                    trigger: containerRef.current,
+                    start: "top top",
+                    end: "+=4000", 
+                    pin: true,
+                    scrub: 0.5,
+                    onUpdate: render,
+                }
+            });
+
+            // No Scale applied here to keep the Title stable
+            gsap.set(mapSectionRef.current, { y: "5%" });
+            gsap.set(bgRef.current, { y: 0 });
+
+            // PHASE 1: Render frames 0 to 15 (Focus North)
+            tl.to(sequenceObj, {
+                frame: 15,
+                ease: "none",
+                duration: 2,
+            });
+
+            // PHASE 2: Parallax Shift (Focus South)
+            // Title and Map Top move up together
+            tl.to(mapSectionRef.current, {
+                y: "-30%", 
+                ease: "power2.inOut",
+                duration: 1.5,
+            }, "shift");
+
+            // Background moves slower for depth
+            tl.to(bgRef.current, {
+                y: "-15%", 
+                ease: "power2.inOut",
+                duration: 1.5,
+            }, "shift");
+
+            // PHASE 3: Render frames 16 to 23 (Stable Bottom)
+            tl.to(sequenceObj, {
+                frame: frameCount - 1,
+                ease: "none",
+                duration: 1.5,
+            });
+
+        });
+
+        return () => ctx.revert();
+    }, [images]);
 
     return (
-        <section className="relative w-full min-h-screen">
-
-            {/* Scene 3 Background - Fixed/Sticky */}
-            <div className="absolute inset-0 z-0 h-full">
-                <div className="sticky top-0 h-screen w-full overflow-hidden">
-                    <NextImage
+        <section ref={containerRef} className="relative w-full h-screen bg-slate-900 overflow-hidden font-outfit">
+            
+            {/* 1. Sticky Background Wrapper */}
+            <div className="absolute inset-0 z-0 h-full pointer-events-none">
+                <div ref={bgRef} className="relative h-[120%] w-full">
+                    <Image
                         src="/images/scene3/scene3-bg.jpg"
                         alt="Scene 3 Background"
                         fill
-                        className="object-cover"
+                        className="object-cover opacity-40"
+                        priority
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-b from-slate-900/60 via-transparent to-slate-900/90"></div>
+                </div>
+            </div>
+
+            {/* 2. Content Layer */}
+            <div 
+                ref={mapSectionRef}
+                className="relative z-10 w-full h-full flex flex-col will-change-transform"
+            >
+                {/* Header - Styled like your Journey page */}
+                <div className="container mx-auto px-6 md:px-12 pt-20">
+                    <div className="mb-8 pl-6 border-l-[8px] border-blue-500">
+                        <h2 className="text-4xl md:text-5xl font-bebas font-bold italic text-white tracking-wide shadow-sm uppercase">
+                            Taikisha India Footprint
+                        </h2>
+                    </div>
+                </div>
+
+                {/* Map/Sequence Canvas */}
+                <div className="flex-1 flex items-center justify-center px-6">
+                    <canvas
+                        ref={canvasRef}
+                        className="w-full max-w-5xl h-auto object-contain drop-shadow-[0_0_50px_rgba(34,211,238,0.2)]"
+                        style={{ maxHeight: '80vh' }}
                     />
                 </div>
             </div>
 
-            {/* Header scrolls normally over the background */}
-            <div className="container mx-auto px-6 md:px-12 py-20 relative z-10">
-                <div className="pl-6 border-l-[8px] border-cyan-400 inline-block">
-                    <h2 className="text-4xl md:text-5xl font-bebas font-bold italic text-white tracking-wide shadow-sm uppercase">
-                        Taikisha India Footprint
-                    </h2>
-                </div>
-            </div>
-
-            {/* Spacer before canvas */}
-            <div className="h-40 md:h-60 relative z-10"></div>
-
-            {/* Canvas pinned separately */}
-            <div
-                ref={containerRef}
-                className="relative w-full h-screen overflow-hidden z-10"
-            >
-                <canvas
-                    ref={canvasRef}
-                    className="absolute inset-0 w-full h-full block"
-                />
-
-                {!isLoaded && (
-                    <div className="absolute bottom-10 right-10 z-50">
-                        <div className="text-cyan-400 font-mono text-xs animate-pulse">
-                            LOADING ASSETS...
-                        </div>
-                    </div>
-                )}
-            </div>
+            {/* Subtle glow behind the map */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1/2 h-1/2 bg-cyan-500/5 blur-[120px] rounded-full z-[5] pointer-events-none"></div>
         </section>
     );
-}
+};
+
+export default Scene3_Map_Sequence;
