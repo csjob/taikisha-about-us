@@ -46,7 +46,7 @@ export default function Scene4_ParallaxText() {
 
             {/* Scrolling Content Layer - Spacing Matches Scene 2 (pt-10) */}
             <div className="relative z-10 w-full flex flex-col items-center pt-10 pb-40">
-                <div className="container mx-auto px-6 md:px-12">
+                <div className="container mx-auto px-6 md:px-12 text-white">
 
                     {/* Header - Matches Scene 2 (mb-16, Left Aligned via container) */}
                     <div className="pl-6 border-l-[8px] border-blue-600 mb-16">
@@ -56,7 +56,7 @@ export default function Scene4_ParallaxText() {
                     </div>
 
                     {/* Text Content */}
-                    <div ref={contentRef} className="text-white max-w-6xl mx-auto px-4 md:px-0">
+                    <div ref={contentRef} className="text-white max-w-6xl mx-auto px-4 md:px-0 mt-24 md:mt-36">
                         <div className="space-y-8 text-lg md:text-xl font-light italic text-slate-100 leading-relaxed tracking-wide drop-shadow-lg text-justify">
                             <p>
                                 Guided by our Mission Statement, &quot;Customers First,&quot; we are committed to our Corporate Philosophy:
@@ -175,7 +175,7 @@ export default function Scene4_ParallaxText() {
                         </div>
 
                         {/* Bottom Full Card */}
-                        <div className="bg-[#e3bb2b]/80 p-8 md:p-10 shadow-lg rounded-sm">
+                        <div className="bg-[#e3bb2b]/80 p-8 md:p-10 shadow-lg rounded-sm text-white">
                             <h3 className="text-2xl font-bold font-bebas uppercase mb-8 tracking-wider border-b border-[#fff]/10 pb-4">
                                 Mid-Term and Long-Term Vision
                             </h3>

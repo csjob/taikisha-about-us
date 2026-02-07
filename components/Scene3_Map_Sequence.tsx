@@ -138,10 +138,10 @@ const Scene3_Map_Sequence: React.FC = () => {
                 </div>
 
                 {/* Map/Sequence Canvas */}
-                <div className="flex-1 flex items-center justify-center px-6">
+                <div className="flex-1 flex items-start justify-center px-6 pt-10 ">
                     <canvas
                         ref={canvasRef}
-                        className="w-full max-w-5xl h-auto object-contain drop-shadow-[0_0_50px_rgba(34,211,238,0.2)]"
+                        className="w-full max-w-[calc(64rem+4rem)] md:max-w-[calc(64rem+4rem)] h-auto object-contain drop-shadow-[0_0_50px_rgba(34,211,238,0.2)]"
                         style={{ maxHeight: '80vh' }}
                     />
                 </div>

@@ -159,7 +159,7 @@ function Marker({ lat, lng, Office, company, city, country, address, phone, fax,
     useCursor(hovered);
 
     // Visual parameters
-    const pinHeight = 0.2;
+    const pinHeight = 0.13;
     const headRadius = 0.07;
 
     // Use a local internal clock for the pulse effect
