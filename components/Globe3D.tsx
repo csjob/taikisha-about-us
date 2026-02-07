@@ -154,7 +154,6 @@ const locations = companyLocations;
 function Marker({ lat, lng, Office, company, city, country, address, phone, fax, radius, isActive, onClick, onPointerOver, onPointerOut }: any) {
     const position = useMemo(() => calcPosFromLatLonRad(lat, lng, radius), [lat, lng, radius]);
     const [hovered, setHover] = useState(false);
-    const ringRef = useRef<THREE.Mesh>(null);
 
     useCursor(hovered);
 
